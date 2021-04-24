@@ -1,11 +1,11 @@
-import TextEditor from 'components/TextEditor';
+import Router from 'components/Router';
 
 import 'assets/css/App.css';
 
 function App() {
   return (
     <div className="App">
-      <TextEditor />
+      <Router />
     </div>
   );
 }
