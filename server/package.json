@@ -4,7 +4,8 @@
   "description": "backend server for my-docs",
   "main": "index.js",
   "scripts": {
-    "start:dev": "nodemon server.js"
+    "start:dev": "nodemon index.js",
+    "start": "node index.js"
   },
   "author": "AAkrit Subedi",
   "license": "ISC",
