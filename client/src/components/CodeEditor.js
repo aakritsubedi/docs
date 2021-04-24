@@ -1,7 +1,6 @@
-import React, { useState , useEffect} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import AceEditor from 'react-ace';
-
 
 import 'ace-builds/src-noconflict/mode-jsx';
 /*eslint-disable no-alert, no-console */
@@ -48,12 +47,14 @@ languages.forEach((lang) => {
 themes.forEach((theme) => require(`ace-builds/src-noconflict/theme-${theme}`));
 
 const CodeEditor = () => {
+  const codeEditor = useRef();
   const [value, setValue] = useState('//type your code here ...');
   const [mode, setMode] = useState('javascript');
   const [theme, setTheme] = useState('monokai');
   const [socket, setSocket] = useState();
-  
-  const onChange = (newValue) => {
+  const [editorCode, setEditorCode] = useState(Math.random().toString(36).substr(2, 9));
+
+  const onChange = (newValue, e) => {
     setValue(newValue);
   };
 
@@ -61,6 +62,7 @@ const CodeEditor = () => {
     console.log('Connecting ....');
     const s = io('http://localhost:3001');
     setSocket(s);
+    console.log(codeEditor);
 
     return () => {
       console.log('Dis-connecting ....');
@@ -69,14 +71,21 @@ const CodeEditor = () => {
   }, []);
 
   useEffect(() => {
-    if (socket == null || value == null) return;
+    if (socket == null) return;
 
-    const handler = (delta) => {
-      socket.emit('send-code-changes', delta);
+    const handler = (delta, source) => {
+      if (source !== editorCode) return;
+
+      socket.emit('send-code-changes', {
+        code: delta,
+        source: source
+      });
     };
 
-    handler(value);
-    
+    const editor = codeEditor.current.editor;
+    console.log(editor);
+    handler(editor.getValue(), editorCode);
+
     return () => {
       // quill.off('text-change', handler);
     };
@@ -84,9 +93,10 @@ const CodeEditor = () => {
 
   useEffect(() => {
     if (socket == null || value == null) return;
-    
+
     const handler = (delta) => {
-      setValue(delta);
+      if (delta.source === editorCode) return;
+      setValue(delta.code);
     };
 
     socket.on('receive-code-changes', handler);
@@ -134,13 +144,15 @@ const CodeEditor = () => {
         mode={mode}
         theme={theme}
         onChange={onChange}
+        ref={codeEditor}
         value={value}
-        name="code-editor"
+        // name="code-editor"
         highlightActiveLine={true}
         fontSize={14}
         enableLiveAutocompletion={true}
         enableBasicAutocompletion={true}
         editorProps={{ $blockScrolling: true }}
+        name={'code-editor-' + editorCode}
       />
     </div>
   );
