@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
+import { io } from 'socket.io-client';
 import AceEditor from 'react-ace';
+
 
 import 'ace-builds/src-noconflict/mode-jsx';
 /*eslint-disable no-alert, no-console */
@@ -45,19 +47,54 @@ languages.forEach((lang) => {
 
 themes.forEach((theme) => require(`ace-builds/src-noconflict/theme-${theme}`));
 
-const defaultValue = `function onLoad(editor) {
-  console.log("i've loaded");
-}`;
-
 const CodeEditor = () => {
   const [value, setValue] = useState('//type your code here ...');
-
+  const [mode, setMode] = useState('javascript');
+  const [theme, setTheme] = useState('monokai');
+  const [socket, setSocket] = useState();
+  
   const onChange = (newValue) => {
     setValue(newValue);
   };
 
-  const [mode, setMode] = useState('javascript');
-  const [theme, setTheme] = useState('monokai');
+  useEffect(() => {
+    console.log('Connecting ....');
+    const s = io('http://localhost:3001');
+    setSocket(s);
+
+    return () => {
+      console.log('Dis-connecting ....');
+      s.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (socket == null || value == null) return;
+
+    const handler = (delta) => {
+      socket.emit('send-code-changes', delta);
+    };
+
+    handler(value);
+    
+    return () => {
+      // quill.off('text-change', handler);
+    };
+  }, [socket, value]);
+
+  useEffect(() => {
+    if (socket == null || value == null) return;
+    
+    const handler = (delta) => {
+      setValue(delta);
+    };
+
+    socket.on('receive-code-changes', handler);
+
+    return () => {
+      socket.off('receive-code-changes', handler);
+    };
+  }, [socket, value]);
 
   return (
     <div className="code-editor">

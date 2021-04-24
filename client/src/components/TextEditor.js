@@ -26,7 +26,6 @@ const TextEditor = () => {
   useEffect(() => {
     console.log('Connecting ....');
     const s = io('http://localhost:3001');
-    setSocket(s);
 
     return () => {
       console.log('Dis-connecting ....');

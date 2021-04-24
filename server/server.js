@@ -9,4 +9,8 @@ io.on("connection", socket => {
   socket.on('send-text-changes', delta => {
     socket.broadcast.emit('receive-text-changes', delta);
   });
+
+  socket.on('send-code-changes', delta => {
+    socket.broadcast.emit('receive-code-changes', delta);
+  })
 });
