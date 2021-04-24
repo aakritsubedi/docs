@@ -8,11 +8,14 @@ import * as routes from 'constants/routes';
 import Home from './Home';
 
 const Routes = () => {
+  const textEditorRoutes = routes.TEXT_EDITOR + '/:id';
+  const codeEditorRoutes = routes.CODE_EDITOR + '/:id';
+  
   return (
     <Router>
       <Switch>
-        <Route path={routes.TEXT_EDITOR} component={TextEditor} />
-        <Route path={routes.CODE_EDITOR} component={CodeEditor} />
+        <Route path={textEditorRoutes} component={TextEditor} />
+        <Route path={codeEditorRoutes} component={CodeEditor} />
         <Route path={routes.HOME} component={Home} />
       </Switch>
     </Router>

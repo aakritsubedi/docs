@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import AceEditor from 'react-ace';
 
@@ -6,6 +7,7 @@ import 'ace-builds/src-noconflict/mode-jsx';
 /*eslint-disable no-alert, no-console */
 import 'ace-builds/src-min-noconflict/ext-searchbox';
 import 'ace-builds/src-min-noconflict/ext-language_tools';
+import { SAVE_INTERVAL_MS } from 'constants/constants';
 
 const languages = [
   'javascript',
@@ -48,11 +50,12 @@ themes.forEach((theme) => require(`ace-builds/src-noconflict/theme-${theme}`));
 
 const CodeEditor = () => {
   const codeEditor = useRef();
+  const { id: documentId } = useParams();
   const [value, setValue] = useState('//type your code here ...');
   const [mode, setMode] = useState('javascript');
   const [theme, setTheme] = useState('monokai');
   const [socket, setSocket] = useState();
-  const [editorCode, setEditorCode] = useState(Math.random().toString(36).substr(2, 9));
+  const editorCode = Math.random().toString(36).substr(2, 9);
 
   const onChange = (newValue, e) => {
     setValue(newValue);
@@ -83,13 +86,12 @@ const CodeEditor = () => {
     };
 
     const editor = codeEditor.current.editor;
-    console.log(editor);
     handler(editor.getValue(), editorCode);
 
     return () => {
       // quill.off('text-change', handler);
     };
-  }, [socket, value]);
+  }, [socket, value, editorCode]);
 
   useEffect(() => {
     if (socket == null || value == null) return;
@@ -104,7 +106,30 @@ const CodeEditor = () => {
     return () => {
       socket.off('receive-code-changes', handler);
     };
-  }, [socket, value]);
+  }, [socket, value, editorCode]);
+
+  useEffect(() => {
+    if (socket == null || value == null) return;
+
+    socket.once('load-editor', (editor) => {
+      setValue(editor)
+    });
+
+    socket.emit('get-editor', documentId);
+  }, [socket, documentId]);
+
+  useEffect(() => {
+    if (socket == null || value == null) return;
+
+    const interval = setInterval(() => {
+      socket.emit('save-code', value);
+    }, SAVE_INTERVAL_MS);
+
+    return () => {
+      clearInterval(interval);
+    }
+
+  }, [socket, value])
 
   return (
     <div className="code-editor">
