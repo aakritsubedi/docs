@@ -11,6 +11,8 @@ const TOOLBAR_OPTIONS = [
   ['bold', 'italic', 'underline'],
   [{ color: [] }, { background: [] }],
   [{ scripts: 'sub' }, { scripts: 'super' }],
+  [{ 'indent': '-1'}, { 'indent': '+1' }],
+  [{ size: [ 'small', false, 'large', 'huge' ]}],
   [{ align: [] }],
   ['image', 'blockquote', 'code-block'],
   ['clean'],

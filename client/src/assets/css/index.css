@@ -56,3 +56,22 @@ body {
     display: none;
   }
 }
+
+/* Code Editor */
+.code-editor {
+  display: flex;
+}
+.editor-menu {
+  padding: 0 10px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+}
+.editor-menu .title {
+  font-size: 18px;
+}
+.field label {
+  font-size: 14px;
+}
+.code-editor .ace_editor {
+  width: 100% !important;
+  min-height: 100vh;
+}
